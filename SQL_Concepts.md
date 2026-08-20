@@ -1,517 +1,183 @@
-# SQL and Database Concepts – Technical Paper
-
+# SQL Technical Notes
 ## 1. ACID
-
-**ACID** is a set of properties that makes database transactions reliable and safe.
-
-ACID stands for:
-
-* **Atomicity** – A transaction is completed fully or not at all.
-* **Consistency** – Data must remain valid before and after a transaction.
-* **Isolation** – Multiple transactions should not incorrectly affect each other.
-* **Durability** – Once data is committed, it should not be lost.
-
-### Example
-
-In a bank transfer:
-
-```sql
-BEGIN;
-
-UPDATE accounts SET balance = balance - 1000 WHERE id = 1;
-UPDATE accounts SET balance = balance + 1000 WHERE id = 2;
-
-COMMIT;
-```
-
-If something fails, we can use:
-
-```sql
-ROLLBACK;
-```
-
-**Easy to remember:**
-**Atomicity = All or Nothing**
-
----
-
+- **Atomicity** → All or nothing; failed transactions are undone. 
+- **Consistency** → Keeps data valid before and after a transaction.
+- **Isolation** → Keeps concurrent transactions safely separated.
+- **Durability** → Keeps committed changes saved even after a failure.
 ## 2. CAP Theorem
-
-The **CAP Theorem** is mainly used for distributed databases.
-
-CAP stands for:
-
-* **Consistency** – Every user gets the latest correct data.
-* **Availability** – The system always gives a response.
-* **Partition Tolerance** – The system continues working even if servers cannot communicate.
-
-When a network partition occurs, a distributed system generally has to choose between **Consistency** and **Availability**.
-
-### Example
-
-If two database servers cannot communicate:
-
 ```text
 Server A  ---- X ----  Server B
 ```
-
-The system can:
-
-* Stop some operations to maintain **Consistency** → **CP**
-* Continue responding while allowing temporary differences → **AP**
-
-**Easy to remember:**
-**CAP = Consistency, Availability, Partition Tolerance**
-
----
-
+- **X** → Communication failure between servers.
+- **CP** → Stops some operations to keep data consistent.
+- **AP** → Keeps responding even if data is temporarily different.
+- **CAP** → Consistency, Availability, Partition Tolerance.
 ## 3. Joins
-
-A **JOIN** combines data from two or more related tables.
-
-Suppose we have:
-
-### Employees
-
-| id | name  | department_id |
-| -: | ----- | ------------: |
-|  1 | Rahul |            10 |
-|  2 | Priya |            20 |
-
-### Departments
-
-| id | department |
-| -: | ---------- |
-| 10 | IT         |
-| 20 | HR         |
-
-### INNER JOIN
-
-Returns only matching records.
-
+A JOIN combines related data from two or more tables.
+For example, employees can be connected to their departments.
+Employees may contain an employee name and a department ID.
+Departments may contain a department ID and department name.
+An INNER JOIN returns only rows that match in both tables.
+Example:
 ```sql
 SELECT e.name, d.department
 FROM employees e
 INNER JOIN departments d
 ON e.department_id = d.id;
 ```
+- A **LEFT JOIN** returns every row from the left table and matching rows from the right.
+- A **RIGHT JOIN** returns every row from the right table and matching rows from the left.
+- A **FULL JOIN** returns rows from both tables, including unmatched rows.
+- A **CROSS JOIN** creates every possible combination of rows.
+- A **SELF JOIN** joins a table with itself.
 
-### Common JOIN Types
-
-| JOIN           | Meaning                                |
-| -------------- | -------------------------------------- |
-| **INNER JOIN** | Matching records only                  |
-| **LEFT JOIN**  | All records from left table + matches  |
-| **RIGHT JOIN** | All records from right table + matches |
-| **FULL JOIN**  | All records from both tables           |
-| **CROSS JOIN** | Every possible combination             |
-| **SELF JOIN**  | A table joined with itself             |
-
-**Easy to remember:**
-
+Easy to remember:
 ```text
-INNER → Matching
-LEFT  → Everything on left
-RIGHT → Everything on right
-FULL  → Everything
+INNER → Matching rows
+LEFT  → Everything on the left
+RIGHT → Everything on the right
+FULL  → Everything from both
 ```
-
----
-
-## 4. Aggregations and Filters in Queries
-
-### Aggregate Functions
-
-Aggregate functions perform calculations on multiple rows.
-
-| Function  | Purpose            |
-| --------- | ------------------ |
-| `COUNT()` | Counts rows        |
-| `SUM()`   | Calculates total   |
-| `AVG()`   | Calculates average |
-| `MIN()`   | Finds minimum      |
-| `MAX()`   | Finds maximum      |
-
+## 4. Aggregations and Filters
+Aggregate functions perform calculations using multiple rows.
+`COUNT()` counts rows.
+`SUM()` calculates a total.
+`AVG()` calculates an average.
+`MIN()` finds the smallest value.
+`MAX()` finds the largest value.
 Example:
-
 ```sql
 SELECT AVG(salary)
 FROM employees;
 ```
-
-### GROUP BY
-
-`GROUP BY` creates groups before performing aggregation.
-
+`GROUP BY` puts rows into groups before an aggregate calculation.
+Example:
 ```sql
 SELECT department, COUNT(*)
 FROM employees
 GROUP BY department;
 ```
-
-### WHERE
-
-`WHERE` filters individual rows.
-
+`WHERE` filters individual rows before grouping.
+Example:
 ```sql
 SELECT *
 FROM employees
 WHERE salary > 50000;
 ```
-
-### HAVING
-
 `HAVING` filters groups after aggregation.
-
+Example:
 ```sql
 SELECT department, COUNT(*)
 FROM employees
 GROUP BY department
 HAVING COUNT(*) > 2;
 ```
-
-### Easy Difference
-
-```text
-WHERE   → Filters rows
-GROUP BY → Creates groups
-HAVING  → Filters groups
-ORDER BY → Sorts results
-```
-
----
-
+Easy difference: WHERE filters rows.
+GROUP BY creates groups.
+HAVING filters groups.
+ORDER BY sorts the final results.
 ## 5. Normalization
+Organizes tables to reduce duplicate data and avoid common data problems.
+- **Primary key** → Uniquely identifies each row in a table.
+- **Foreign key** → Connects one table to another using a related key.
+- **1NF** (First Normal Form) → Each cell should contain only one value, not multiple values.
+- **2NF** (Second Normal Form) → Removes partial dependencies, so non-key data depends on the complete key.
+- **3NF** (Third Normal Form) → Removes transitive dependencies, so non-key data depends directly on the key.
 
-**Normalization** is the process of organizing database tables to **reduce duplicate data and prevent data problems**.
-
-For example, instead of storing department information repeatedly:
-
-```text
-Employee
--------------------------
-ID | Name | Department
+Easy to remember:
 ```
-
-we can separate it into:
-
-```text
-Employees
--------------------------
-ID | Name | Department_ID
-
-Departments
--------------------------
-ID | Department_Name
-```
-
-The tables are connected using **primary keys and foreign keys**.
-
-### Normal Forms
-
-| Normal Form | Main Idea                         |
-| ----------- | --------------------------------- |
-| **1NF**     | Each cell contains a single value |
-| **2NF**     | No partial dependency             |
-| **3NF**     | No transitive dependency          |
-
-### Benefits
-
-* Reduces duplicate data
-* Improves data consistency
-* Prevents update, insert, and delete problems
-* Makes the database easier to maintain
-
-**Easy to remember:**
-
-```text
 1NF → Atomic values
 2NF → No partial dependency
 3NF → No transitive dependency
 ```
-
----
-
 ## 6. Indexes
+An **index** is a database structure that helps find data faster. Without an index, the database may need to check many rows, while a useful index helps it find matching rows quickly, similar to using a book’s index to find a topic.
 
-An **index** is a database structure that helps find data faster.
 
-It is similar to the **index of a book**.
-
-Without an index:
-
-```text
-Database → Search many rows → Find data
-```
-
-With an index:
-
-```text
-Database → Index → Find data faster
-```
-
-### Create an Index
-
+Example:
 ```sql
 CREATE INDEX idx_employee_name
 ON employees(name);
 ```
-
-Now searches using `name` may become faster:
-
+After creating the index, a search by name may become faster.
+Example:
 ```sql
 SELECT *
 FROM employees
 WHERE name = 'Rahul';
 ```
-
-### Advantages
-
-* Faster data retrieval
-* Faster searches
-* Can improve some sorting and join operations
-
-### Disadvantages
-
-* Requires extra storage
-* Can slow down `INSERT`, `UPDATE`, and `DELETE`
-* Too many indexes can hurt performance
-
-**Easy to remember:**
-
-> **Index = Faster reads, but extra storage and write cost.**
-
----
+Indexes make data retrieval faster and can improve some sorting and join operations, but they use extra storage and can slow down INSERT, UPDATE, and DELETE operations. Too many indexes can reduce overall performance.
 
 ## 7. Transactions
-
-A **transaction** is a group of SQL operations treated as **one unit of work**.
+A **transaction** is a group of database operations treated as one unit of work. For example, in a bank transfer, money is deducted from one account and added to another. If both operations succeed, the transaction is committed; if something fails, the transaction can be rolled back.
 
 Example:
-
 ```sql
 BEGIN;
-
 UPDATE accounts
 SET balance = balance - 1000
 WHERE id = 1;
-
 UPDATE accounts
 SET balance = balance + 1000
 WHERE id = 2;
-
 COMMIT;
 ```
-
-If something goes wrong:
-
-```sql
-ROLLBACK;
-```
-
-### Important Commands
-
-| Command     | Purpose                              |
-| ----------- | ------------------------------------ |
-| `BEGIN`     | Starts a transaction                 |
-| `COMMIT`    | Saves changes                        |
-| `ROLLBACK`  | Undoes uncommitted changes           |
-| `SAVEPOINT` | Creates a point for partial rollback |
-
-### Real Example
-
-For a bank transfer:
-
-```text
-Debit Account A
-      ↓
-Credit Account B
-      ↓
-Both successful?
-   ↙       ↘
- YES        NO
- ↓           ↓
-COMMIT    ROLLBACK
-```
-
-**Easy to remember:**
-
-> **Transaction = A group of operations that should succeed or fail together.**
-
----
+- `BEGIN` starts a transaction.
+- `COMMIT` saves the transaction changes.
+- `ROLLBACK` undoes uncommitted changes.
+- `SAVEPOINT` creates a point that can be used for a partial rollback.
 
 ## 8. Locking Mechanism
+**Locking** controls how multiple transactions access the same data and helps prevent lost updates or conflicting changes. A **shared lock** is used for reading and can be held by multiple transactions, while an **exclusive lock** is used when changing data and may make other conflicting operations wait.
 
-**Locking** controls how multiple transactions access the same data at the same time.
 
-It helps prevent problems such as:
-
-* Lost updates
-* Conflicting changes
-* Incorrect concurrent operations
-
-### Shared Lock
-
-A **Shared Lock** is mainly used when data is being read with locking requirements.
-
-Multiple compatible shared locks can exist at the same time.
-
-### Exclusive Lock
-
-An **Exclusive Lock** is used when data needs to be modified.
-
-Other conflicting operations must wait.
-
-### Example
-
-In PostgreSQL:
-
+Example in PostgreSQL:
 ```sql
 SELECT *
 FROM accounts
 WHERE id = 1
 FOR UPDATE;
 ```
-
-This locks the selected row for update.
-
-### Deadlock
-
-A **deadlock** happens when two transactions wait for each other.
-
+`FOR UPDATE` locks the selected row for update.
+A deadlock happens when transactions wait for each other.
+Example:
 ```text
 Transaction A → Locks Row 1 → Wants Row 2
 Transaction B → Locks Row 2 → Wants Row 1
 ```
-
-Neither can continue until the database detects and resolves the conflict.
-
-**Easy to remember:**
-
-> **Locking = Controlling access to shared data.**
-
----
-
+Neither transaction can continue normally while the circular wait remains.
+The database can detect and resolve a deadlock.
+Easy to remember: locking controls access to shared data.
 ## 9. Database Isolation Levels
-
-**Isolation levels** control how much one transaction can see from other transactions running at the same time.
-
-The common isolation levels are:
-
-1. **READ UNCOMMITTED**
-2. **READ COMMITTED**
-3. **REPEATABLE READ**
-4. **SERIALIZABLE**
-
-### 1. READ UNCOMMITTED
-
-Allows the weakest isolation.
-
-A transaction may read data that another transaction has not committed yet.
-
-This can cause a **dirty read**.
-
-### 2. READ COMMITTED
-
-A transaction sees only committed data.
-
-**This is the default isolation level in PostgreSQL.**
-
-### 3. REPEATABLE READ
-
-A transaction gets a consistent view of data during its execution.
-
-### 4. SERIALIZABLE
-
-The strongest standard isolation level.
-
-Transactions behave as if they were executed one after another.
-
-### Comparison
-
-| Level            | Isolation | Performance |
-| ---------------- | --------- | ----------- |
-| READ UNCOMMITTED | Lowest    | High        |
-| READ COMMITTED   | Medium    | High        |
-| REPEATABLE READ  | Higher    | Medium      |
-| SERIALIZABLE     | Highest   | Lower       |
-
-### Common Problems
-
-* **Dirty Read** – Reading uncommitted data
-* **Non-Repeatable Read** – Same row gives different values
-* **Phantom Read** – A repeated query returns a different set of rows
-
-**Easy to remember:**
-
-> **Higher isolation = stronger consistency but potentially less concurrency.**
-
----
-
+- **Isolation levels** → Control what transactions can see.
+- **READ COMMITTED** → Sees only committed data.
+- **REPEATABLE READ** → Keeps a consistent view.
+- **SERIALIZABLE** → Strongest isolation level.
+- **Trade-off** → Higher isolation improves consistency but may reduce concurrency.
 ## 10. Triggers
-
-A **trigger** is a database feature that automatically performs an action when a specific event occurs.
-
-Common events are:
-
-```text
-INSERT
-UPDATE
-DELETE
-```
-
-### Example
-
-Suppose we want to automatically record salary changes.
-
+A trigger is a database feature that automatically runs an action after a chosen event.
+Common events are INSERT, UPDATE, and DELETE.
+For example, a trigger can record salary changes in an audit table.
+Example idea:
 ```text
 UPDATE Employee
       ↓
-Trigger
+   Trigger
       ↓
 Insert record into Audit Table
 ```
-
-In PostgreSQL, a trigger usually calls a trigger function:
-
+In PostgreSQL, a trigger normally calls a trigger function.
+Example:
 ```sql
 CREATE TRIGGER employee_audit
 AFTER UPDATE ON employees
 FOR EACH ROW
 EXECUTE FUNCTION log_employee_changes();
 ```
-
-### Types
-
-| Type           | Meaning                                           |
-| -------------- | ------------------------------------------------- |
-| **BEFORE**     | Runs before the operation                         |
-| **AFTER**      | Runs after the operation                          |
-| **INSTEAD OF** | Runs instead of the operation, commonly for views |
-| **ROW**        | Runs once for each affected row                   |
-| **STATEMENT**  | Runs once for the whole SQL statement             |
-
-### `OLD` and `NEW`
-
-In row-level triggers:
-
-```text
-OLD → Previous value
-NEW → New value
-```
-
-### Common Uses
-
-* Audit logging
-* Automatic timestamps
-* Data validation
-* Maintaining related data
-
-**Easy to remember:**
-
-> **Trigger = An automatic database action caused by an event.**
-
----
+- **BEFORE** → Runs before the database operation and can validate or modify data before it is saved.
+- **AFTER** → Runs after the operation is completed, commonly used for audit logs or related updates.
+- **INSTEAD OF** → Runs instead of the original operation, mainly used with views.
+- **ROW / STATEMENT** → ROW runs once for each affected row; STATEMENT runs once for the entire SQL statement.
 ## Reference
 
 - PostgreSQL Documentation – Transaction Isolation  
