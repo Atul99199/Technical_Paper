@@ -1,390 +1,147 @@
-# SOLID Principles in Python
+# Technical Paper: SOLID Principles in Python
 
-## Introduction
+## 1. Introduction
+SOLID is a set of five principles for writing clean, flexible, and maintainable code.
+They help organize code, reduce dependencies, and make changes easier.
+- **S** — Single Responsibility
+- **O** — Open/Closed
+- **L** — Liskov Substitution
+- **I** — Interface Segregation
+- **D** — Dependency Inversion
 
-**SOLID** is a collection of 5 principles used to write clean, maintainable, and flexible code.
+## 2. Single Responsibility Principle (SRP)
 
-SOLID stands for:
+A class should have one main responsibility or job.
+A class should not handle unrelated tasks such as database work and report generation.
 
-* **S** — Single Responsibility Principle
-* **O** — Open/Closed Principle
-* **L** — Liskov Substitution Principle
-* **I** — Interface Segregation Principle
-* **D** — Dependency Inversion Principle
-
-Let's understand each principle with a **small and simple example**.
-
----
-
-# 1. S — Single Responsibility Principle (SRP)
-
-## Meaning
-
-> A class should have only **one job**.
-
-Imagine a person who does three jobs:
-
-* Cooking
-* Driving
-* Teaching
-
-It is better to separate these responsibilities.
-
-###  Bad Example
+### Example
 
 ```python
 class Student:
     def study(self):
         print("Student is studying")
-
-    def save_to_database(self):
-        print("Saving student to database")
-
-    def print_report(self):
-        print("Printing report")
-```
-
-The `Student` class is doing too many things:
-
-* Student behavior
-* Database work
-* Report generation
-
-###  Better Example
-
-Separate the responsibilities.
-
-```python
-class Student:
-    def study(self):
-        print("Student is studying")
-
 
 class StudentDatabase:
     def save(self):
-        print("Saving student to database")
-
+        print("Saving student")
 
 class StudentReport:
     def print_report(self):
         print("Printing report")
 ```
 
-Now each class has **one responsibility**.
+Each class now has one clear job.
 
-### Easy way to remember
+**Remember:** S = Single Job.
 
-**S = Single Job**
+## 3. Open/Closed Principle (OCP)
 
-> One class → One main job.
+A class should be open for extension but closed for modification.
+New features should be added without changing existing working code.
 
----
-
-# 2. O — Open/Closed Principle (OCP)
-
-## Meaning
-
-> A class should be **open for extension** but **closed for modification**.
-
-In simple words:
-
-**We should be able to add new functionality without changing existing code.**
-
-###  Bad Example
-
-```python
-class Payment:
-    def pay(self, method):
-        if method == "cash":
-            print("Paid by cash")
-        elif method == "card":
-            print("Paid by card")
-```
-
-If we want to add UPI, we need to modify the `Payment` class.
-
-```python
-elif method == "upi":
-    print("Paid by UPI")
-```
-
-This can become difficult when there are many payment methods.
-
-###  Better Example
-
-Create separate classes.
+### Example
 
 ```python
 class CashPayment:
     def pay(self):
         print("Paid by cash")
 
-
 class CardPayment:
     def pay(self):
         print("Paid by card")
-
 
 class UPIPayment:
     def pay(self):
         print("Paid by UPI")
 ```
 
-Now we can add another payment method without changing the existing classes.
+A new payment method can be added without changing old classes.
 
-```python
-class PayPalPayment:
-    def pay(self):
-        print("Paid by PayPal")
-```
+**Remember:** O = Open to add, Closed to change.
 
-### Easy way to remember
+## 4. Liskov Substitution Principle (LSP)
 
-**O = Open to add, Closed to change**
-
-> Add new features without changing old working code.
-
----
-
-# 3. L — Liskov Substitution Principle (LSP)
-
-## Meaning
-
-> A child class should be usable wherever its parent class is expected.
-
-This sounds difficult, but the idea is simple.
-
-If we say:
-
-> A dog is an animal.
-
-Then a `Dog` should behave like an `Animal`.
+A child class should work wherever its parent class is expected.
+It should not break the behavior expected from the parent.
 
 ### Example
 
 ```python
 class Animal:
     def speak(self):
-        print("Animal makes a sound")
-
+        print("Animal sound")
 
 class Dog(Animal):
     def speak(self):
         print("Dog says Woof")
-```
 
-We can use `Dog` wherever an `Animal` is expected.
-
-```python
 def make_sound(animal):
     animal.speak()
 
-
-dog = Dog()
-
-make_sound(dog)
+make_sound(Dog())
 ```
 
-### Output
+`Dog` can safely be used as an `Animal`.
 
-```text
-Dog says Woof
-```
-
-This works because `Dog` follows the behavior expected from `Animal`.
-
-### Simple Bad Example
-
-Imagine this:
+### Bad Example
 
 ```python
 class Bird:
     def fly(self):
-        print("Bird is flying")
-
+        print("Flying")
 
 class Penguin(Bird):
     def fly(self):
-        raise Exception("Penguins cannot fly")
+        raise Exception("Cannot fly")
 ```
 
-Now:
+A penguin should not inherit a behavior it cannot support.
 
-```python
-def make_bird_fly(bird):
-    bird.fly()
+**Remember:** L = Child should work like the parent.
 
+## 5. Interface Segregation Principle (ISP)
 
-penguin = Penguin()
-make_bird_fly(penguin)
-```
+A class should not be forced to use methods it does not need.
+Keep classes and interfaces small and focused.
 
-The program fails.
-
-The problem is that `Penguin` should not be forced into a design where every `Bird` must fly.
-
-### Better Design
-
-```python
-class Bird:
-    def eat(self):
-        print("Bird is eating")
-
-
-class FlyingBird(Bird):
-    def fly(self):
-        print("Bird is flying")
-
-
-class Penguin(Bird):
-    pass
-
-
-class Eagle(FlyingBird):
-    pass
-```
-
-Now only birds that can fly inherit from `FlyingBird`.
-
-### Easy way to remember
-
-**L = Child should work like the parent**
-
-> A child class should not break the expectations of the parent class.
-
----
-
-# 4. I — Interface Segregation Principle (ISP)
-
-## Meaning
-
-> A class should not be forced to use methods that it doesn't need.
-
-Python does not require traditional interfaces like some other languages, but we can still understand the principle using classes.
-
-###  Bad Example
-
-Suppose we create a large `Machine` class.
-
-```python
-class Machine:
-    def print_document(self):
-        pass
-
-    def scan_document(self):
-        pass
-
-    def fax_document(self):
-        pass
-```
-
-Now imagine a simple printer.
-
-```python
-class SimplePrinter(Machine):
-
-    def print_document(self):
-        print("Printing document")
-
-    def scan_document(self):
-        raise NotImplementedError
-
-    def fax_document(self):
-        raise NotImplementedError
-```
-
-The printer does not support scanning or faxing, but it is forced to implement those methods.
-
-###  Better Example
-
-Separate the responsibilities.
+### Example
 
 ```python
 class Printer:
     def print_document(self):
-        print("Printing document")
-
+        print("Printing")
 
 class Scanner:
     def scan_document(self):
-        print("Scanning document")
-
+        print("Scanning")
 
 class Fax:
     def fax_document(self):
-        print("Faxing document")
-```
+        print("Faxing")
 
-A simple printer only needs:
-
-```python
-printer = Printer()
-
-printer.print_document()
-```
-
-A multifunction machine can use all three:
-
-```python
 class MultiFunctionMachine(Printer, Scanner, Fax):
     pass
 ```
 
-### Easy way to remember
+A simple printer only needs printing, while a multifunction machine can use all three.
 
-**I = Interface should be small**
+**Remember:** I = Keep interfaces small.
 
-> Don't force a class to implement things it doesn't need.
+## 6. Dependency Inversion Principle (DIP)
 
----
+A class should not depend directly on one specific service.
+Instead, give it the service it needs from outside.
 
-# 5. D — Dependency Inversion Principle (DIP)
-
-## Meaning
-
-> A class should depend on an **abstraction**, not directly on a specific class.
-
-This sounds complicated, so let's use a simple example.
-
-Imagine an `Order` class that directly creates an email service.
-
-###  Bad Example
+### Example
 
 ```python
 class Email:
     def send(self):
         print("Sending email")
-
-
-class Order:
-    def __init__(self):
-        self.email = Email()
-
-    def place_order(self):
-        print("Order placed")
-        self.email.send()
-```
-
-The `Order` class is directly connected to `Email`.
-
-If we want SMS instead, we have to change the `Order` class.
-
----
-
-##  Better Example
-
-Let the `Order` class receive the notification service from outside.
-
-```python
-class Email:
-    def send(self):
-        print("Sending email")
-
 
 class SMS:
     def send(self):
         print("Sending SMS")
-
 
 class Order:
     def __init__(self, notification):
@@ -393,88 +150,50 @@ class Order:
     def place_order(self):
         print("Order placed")
         self.notification.send()
+
+Order(Email()).place_order()
+Order(SMS()).place_order()
 ```
+The `Order` class works with both Email and SMS without changing its code.
+This approach is called **Dependency Injection**.
 
-Now we can use email:
+**Remember:** D = Depend on abstractions, not specific classes.
 
-```python
-email = Email()
+## 7. SOLID Quick Revision
 
-order = Order(email)
-order.place_order()
-```
+| Letter | Principle | Simple Meaning |
+|---|---|---|
+| **S** | Single Responsibility | One class → One job |
+| **O** | Open/Closed | Add features without changing old code |
+| **L** | Liskov Substitution | Child should work like the parent |
+| **I** | Interface Segregation | Do not force unnecessary methods |
+| **D** | Dependency Inversion | Depend on abstractions |
 
-Output:
+## 8. Benefits of SOLID
 
-```text
-Order placed
-Sending email
-```
+SOLID principles make code:
 
-Or we can use SMS:
+- Easier to understand
+- Easier to test
+- Easier to maintain
+- Easier to extend
+- More reusable
+- Less tightly connected
 
-```python
-sms = SMS()
+## 9. Conclusion
 
-order = Order(sms)
-order.place_order()
-```
+SOLID provides simple rules for writing better software.
+The main goal is to keep classes focused and reduce unnecessary dependencies.
+Using SOLID can make Python programs cleaner, flexible, reusable,
+and easier to maintain.
 
-Output:
+## References
 
-```text
-Order placed
-Sending SMS
-```
-
-We didn't have to change the `Order` class.
-
-This technique is called **Dependency Injection**.
-
-### Easy way to remember
-
-**D = Depend on abstraction, not a specific thing**
-
-> Give a class what it needs instead of making it create everything itself.
-
----
-
-
-# 6. SOLID Quick Revision
-
-| Letter | Principle             | Simple Meaning                               |
-| ------ | --------------------- | -------------------------------------------- |
-| **S**  | Single Responsibility | One class → One job                          |
-| **O**  | Open/Closed           | Add new code without changing old code       |
-| **L**  | Liskov Substitution   | Child should work like the parent            |
-| **I**  | Interface Segregation | Don't force unnecessary methods              |
-| **D**  | Dependency Inversion  | Depend on abstractions, not specific classes |
-
----
-
-# 7. Easy Trick to Remember SOLID
-
-Think of SOLID like this:
-
- - **S** — One job
- - **O** — Add without changing
- - **L** — Child should fit parent
- - **I** — Keep interfaces small
- - **D** — Don't depend directly on concrete classes
-
- # 8. Referance 
-
-1. Python Software Foundation. "Abstract Base Classes — `abc`." Python Documentation.
+1. Python Software Foundation – Abstract Base Classes  
    https://docs.python.org/3/library/abc.html
-
-2. Python Software Foundation. "Protocols and Structural Subtyping." Python Typing Documentation.
-   https://typing.python.org/en/latest/spec/protocol.html
-
-3. Python Software Foundation. "Classes." Python Documentation.
+2. Python Software Foundation – Classes  
    https://docs.python.org/3/tutorial/classes.html
-
-4. YouTube Tutorial  : https://www.youtube.com/playlist?list=PL6n9fhu94yhXjG1w2blMXUzyDrZ_eyOme
-
-
-
-
+3. Python Typing Documentation – Protocols  
+   https://typing.python.org/en/latest/spec/protocol.html
+4. YouTube Tutorial Playlist  
+   https://www.youtube.com/playlist?list=PL6n9fhu94yhXjG1w2blMXUzyDrZ_eyOme
