@@ -83,20 +83,6 @@ make_sound(Dog())
 
 `Dog` can safely be used as an `Animal`.
 
-### Bad Example
-
-```python
-class Bird:
-    def fly(self):
-        print("Flying")
-
-class Penguin(Bird):
-    def fly(self):
-        raise Exception("Cannot fly")
-```
-
-A penguin should not inherit a behavior it cannot support.
-
 **Remember:** L = Child should work like the parent.
 
 ## 5. Interface Segregation Principle (ISP)
@@ -159,17 +145,7 @@ This approach is called **Dependency Injection**.
 
 **Remember:** D = Depend on abstractions, not specific classes.
 
-## 7. SOLID Quick Revision
-
-| Letter | Principle | Simple Meaning |
-|---|---|---|
-| **S** | Single Responsibility | One class → One job |
-| **O** | Open/Closed | Add features without changing old code |
-| **L** | Liskov Substitution | Child should work like the parent |
-| **I** | Interface Segregation | Do not force unnecessary methods |
-| **D** | Dependency Inversion | Depend on abstractions |
-
-## 8. Benefits of SOLID
+## 7. Benefits of SOLID
 
 SOLID principles make code:
 
@@ -178,9 +154,8 @@ SOLID principles make code:
 - Easier to maintain
 - Easier to extend
 - More reusable
-- Less tightly connected
 
-## 9. Conclusion
+## 8. Conclusion
 
 SOLID provides simple rules for writing better software.
 The main goal is to keep classes focused and reduce unnecessary dependencies.
